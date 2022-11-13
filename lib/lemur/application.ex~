@@ -1,0 +1,29 @@
+defmodule Lemur.Application do
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Applications
+  @moduledoc false
+
+  use Application
+
+  @impl true
+  def start(_type, _args) do
+    # find out why thie sucks?
+    Application.put_env(:baobab, :spool_dir, spool_dir())
+    :ok
+  end
+
+  def spool_dir do
+    # Ensure the application directory exists
+    app_dir =
+      :lemur
+      |> Application.get_env(:application_dir, "~/.lemur")
+      |> Path.expand()
+
+    # Including the spool directory
+    spool_dir = Path.join(app_dir, "spool")
+    File.mkdir_p(spool_dir)
+    spool_dir
+  end
+
+
+end

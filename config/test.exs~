@@ -1,0 +1,18 @@
+import Config
+
+config :lemur,
+  spool_dir: "~/.lemur/baobab",
+  clumps: [
+    [
+      id: "Quagga",
+      controlling_identity: "xiaoli",
+      controlling_secret: System.get_env("QUAGGA_SECRET_KEY"),
+      port: 8483,
+      cryouts: [[host: "moid2.fly.dev", port: 8483, period: {2, :hour}]],
+      public: %{
+        "name" => "basque",
+        "host" => "localhost",
+        "nicker_log_id" => 8483
+      }
+    ]
+  ]
