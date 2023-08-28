@@ -29,7 +29,7 @@ defmodule LemurTest do
     Process.sleep(3000)
   end
 
-  test "run three nodes and connect them n1 -> n2, with a simple post to each" do
+  test "run three nodes and connect them n1 -> n2 -> n3, with a simple post to each" do
     File.rm_rf("~/.lemur-test" |> Path.expand())
     [node1, node2, node3] = spin_up_nodes(:test2, 3)
 
@@ -47,8 +47,6 @@ defmodule LemurTest do
     Node.spawn(node2, fn ->
       Baby.connect("localhost", 8485, identity: "tzobien1", clump_id: "Quagga")
     end)
-
-    # connect from node3 to node1 to replicate
 
     # sleep some to let replication do it's thing
     Process.sleep(7000)
