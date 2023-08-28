@@ -5,7 +5,7 @@ config :logger, level: :info
 # Be sure that all defined ports are properly mapped in the
 # Dockerfile.
 config :lemur,
-  spool_dir: "~/.lemur-test/node/baobab",
+  spool_dir: "~/.lemur-test/node0/baobab",
   clumps: [
     [
       id: "Quagga",
