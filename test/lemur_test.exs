@@ -29,7 +29,7 @@ defmodule LemurTest do
     Process.sleep(3000)
   end
 
-  test "run three nodes and connect them n1 -> n2 -> n3, with a simple post to each" do
+  test "run three nodes and connect them n1 -> n2, with a simple post to each" do
     File.rm_rf("~/.lemur-test" |> Path.expand())
     [node1, node2, node3] = spin_up_nodes(:test2, 3)
 
@@ -49,17 +49,27 @@ defmodule LemurTest do
     end)
 
     # connect from node3 to node1 to replicate
-    Node.spawn(node3, fn ->
-      Baby.connect("localhost", 8483, identity: "tzobien2", clump_id: "Quagga")
-    end)
 
     # sleep some to let replication do it's thing
     Process.sleep(7000)
 
     # check that spawned node has replicate data
+    assert(length(stored_info(node1)) == 2)
+    assert(length(stored_info(node2)) == 3)
+    assert(length(stored_info(node3)) == 2)
+
+    # now connect n3 -> n1, to see all nodes now fully replicated
+    Node.spawn(node3, fn ->
+      Baby.connect("localhost", 8483, identity: "tzobien2", clump_id: "Quagga")
+    end)
+
+    Process.sleep(7000)
+
     assert(length(stored_info(node1)) == 3)
     assert(length(stored_info(node2)) == 3)
     assert(length(stored_info(node3)) == 3)
+
+    Enum.map([node1, node2, node3], fn n -> identities(n) end)
 
     :ok = LocalCluster.stop_nodes([node1, node2, node3])
 
@@ -103,6 +113,21 @@ defmodule LemurTest do
     receive do
       any ->
         IO.puts("Stored info from " <> Atom.to_string(node))
+        IO.inspect(any)
+        any
+    end
+  end
+
+  defp identities(node) do
+    caller = self()
+
+    Node.spawn(node, fn ->
+      send(caller, Baobab.Identity.list())
+    end)
+
+    receive do
+      any ->
+        IO.puts("Identities on " <> Atom.to_string(node))
         IO.inspect(any)
         any
     end
