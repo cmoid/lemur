@@ -3,7 +3,7 @@ defmodule LemurTest do
   doctest Lemur
 
   test "run two nodes, post on each then connect and see both replicate" do
-    File.rm_rf("~/.lemur-test/*" |> Path.expand())
+    File.rm_rf("~/.lemur-test" |> Path.expand())
     [node1, node2] = spin_up_nodes(:test1, 2)
 
     # simple posts on spawned instances
@@ -30,7 +30,7 @@ defmodule LemurTest do
   end
 
   test "run three nodes and connect them n1 -> n2 -> n3, with a simple post to each" do
-    File.rm_rf("~/.lemur-test/*" |> Path.expand())
+    File.rm_rf("~/.lemur-test" |> Path.expand())
     [node1, node2, node3] = spin_up_nodes(:test2, 3)
 
     # simple posts on spawned instances
