@@ -33,6 +33,8 @@ defmodule LemurTest do
     File.rm_rf("~/.lemur-test" |> Path.expand())
     [node1, node2, node3] = spin_up_nodes(:test2, 3)
 
+    Enum.map([node1, node2, node3], fn n -> identities(n) end)
+
     # simple posts on spawned instances
     journal(node1, "bar2", "tzobien0")
     journal(node2, "bar3", "tzobien1")
@@ -42,6 +44,8 @@ defmodule LemurTest do
     Node.spawn(node1, fn ->
       Baby.connect("localhost", 8484, identity: "tzobien0", clump_id: "Quagga")
     end)
+
+    # Process.sleep(7000)
 
     # connect from node2 to node3 to replicate
     Node.spawn(node2, fn ->
@@ -102,30 +106,23 @@ defmodule LemurTest do
   end
 
   defp stored_info(node) do
-    caller = self()
-
-    Node.spawn(node, fn ->
-      send(caller, Baobab.stored_info("Quagga"))
-    end)
-
-    receive do
-      any ->
-        IO.puts("Stored info from " <> Atom.to_string(node))
-        IO.inspect(any)
-        any
-    end
+    run_remote(node, fn -> Baobab.stored_info("Quagga") end)
   end
 
   defp identities(node) do
+    run_remote(node, fn -> Baobab.Identity.list() end)
+  end
+
+  defp run_remote(node, fun) do
     caller = self()
 
     Node.spawn(node, fn ->
-      send(caller, Baobab.Identity.list())
+      send(caller, fun.())
     end)
 
     receive do
       any ->
-        IO.puts("Identities on " <> Atom.to_string(node))
+        IO.puts("remote call on " <> Atom.to_string(node))
         IO.inspect(any)
         any
     end
